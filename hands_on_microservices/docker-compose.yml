@@ -1,0 +1,38 @@
+services:
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+      ME_CONFIG_BASICAUTH: false
+      
+  service_b:
+    build:
+      context: ./service_b
+      dockerfile: Dockerfile
+    volumes:
+      - /tmp:/tmp  # Share /tmp for the Unix Domain Socket
+    restart: always
+
+  service_a:
+    build:
+      context: ./service_a
+      dockerfile: Dockerfile
+    volumes:
+      - /tmp:/tmp  # Share /tmp for the Unix Domain Socket
+    ports:
+      - "8020:8020"  # Expose service_a's port to access it from outside
+    depends_on:
+      - service_b
+    restart: always

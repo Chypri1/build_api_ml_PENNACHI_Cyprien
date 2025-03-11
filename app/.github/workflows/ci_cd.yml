@@ -1,0 +1,64 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - './hands_on_microservices/**'  # Déclenche si un fichier dans frontend/ change
+      - './hands_on_microservices/service_b/**'    # Déclenche si un fichier dans backend/ change
+
+
+jobs:
+  deploy_frontend:
+    if: contains(github.event.head_commit.modified, 'frontend/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Déployer le Frontend
+        run: echo "Déploiement du Frontend"
+
+  deploy_backend:
+    if: contains(github.event.head_commit.modified, 'backend/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Déployer le Backend
+        run: echo "Déploiement du Backend"
+        
+jobs:
+  detect_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Filtrer les fichiers modifiés
+        id: filter
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            backend:
+              - 'backend/**'
+
+  deploy_frontend:
+    needs: detect_changes
+    if: needs.detect_changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Déployer le Frontend
+        run: echo "Déploiement du Frontend"
+
+  deploy_backend:
+    needs: detect_changes
+    if: needs.detect_changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Déployer le Backend
+        run: echo "Déploiement du Backend"
+
+
