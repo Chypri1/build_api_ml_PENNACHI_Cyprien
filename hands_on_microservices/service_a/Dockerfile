@@ -11,3 +11,8 @@ WORKDIR /app
 VOLUME ["/tmp"]
 # Run Uvicorn
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8020"]
+
+LABEL org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}
+LABEL org.opencontainers.image.title="My App"
+LABEL org.opencontainers.image.description="Image générée automatiquement"
+LABEL org.opencontainers.image.licenses=MIT
