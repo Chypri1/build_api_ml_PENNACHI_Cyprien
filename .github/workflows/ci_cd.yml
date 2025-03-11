@@ -1,0 +1,44 @@
+name: Build and Push Docker Image to GHCR
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Vérifier le code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Se connecter à GHCR
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Construire l'image Docker
+      - name: Build Docker image
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/myapp
+          docker build -t $IMAGE_NAME:latest .
+
+      # Marquer l'image avec un tag basé sur le SHA du commit
+      - name: Tag Docker image
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/myapp
+          IMAGE_TAG=${GITHUB_SHA::7}
+          docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_TAG
+
+      # Pousser l'image vers GHCR
+      - name: Push Docker image to GHCR
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/myapp
+          IMAGE_TAG=${GITHUB_SHA::7}
+          docker push $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:$IMAGE_TAG
