@@ -36,3 +36,13 @@ services:
     depends_on:
       - service_b
     restart: always
+  nginx:
+      image: nginx:latest
+      restart: always
+      ports:   
+        - 80:80  
+      volumes:
+        - ./nginx.conf:/etc/nginx/nginx.conf:ro  # On monte notre config Nginx
+      depends_on:
+        - service_a
+        - mongo-express
